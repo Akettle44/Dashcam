@@ -10,7 +10,7 @@ If all of the prequisites have been satisfied, the quickest way to use this code
 //navigate to desired directory
 git clone https://github.com/Akettle44/Dashcam.git
 make all
-./c920settings
+./c920settings.sh
 ./test
 ```
 
