@@ -1,0 +1,14 @@
+./configure \
+  --enable-gpl \
+  --enable-shared \
+  --enable-pic \
+  --enable-shared \
+  --enable-libass \
+  --enable-libfreetype \
+  --enable-libvorbis \
+  --enable-libxvid \
+  --enable-libvpx \
+  --enable-avresample \
+  --enable-libx264 \
+  --enable-libx265 \
+  --enable-nonfree 
