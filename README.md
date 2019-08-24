@@ -38,6 +38,17 @@ Step 1: Install V4L2
 sudo apt-get install v4l-utils
 ```
 
+Step 2: Configure FFFMPEG
+```
+./configffmpeg.sh
+```
+
+Step 3: Cmake Opencv
+```
+sudo su
+cmake -D BUILD_TIFF=ON -D WITH_CUDA=OFF -D ENABLE_AVX=OFF -D WITH_OPENGL=OFF -D WITH_OPENCL=OFF -D WITH_IPP=OFF -D WITH_TBB=ON -D BUILD_TBB=ON -D WITH_EIGEN=OFF -D WITH_V4L=ON -D WITH_VTK=OFF -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_FFMPEG=ON -D WITH_V4L2=ON -D WITH_LIBV4L=ON -D BUILD_JPEG:BOOL=ON -D WITH_JPEG:BOOL=ON -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib/modules /opt/opencv/
+
+```
 
 End with an example of getting some data out of the system or using it for a little demo
 
