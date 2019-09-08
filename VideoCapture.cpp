@@ -2,7 +2,7 @@
 
 int main(int, char**)
 {
-	VideoCapture cap(1, cv::CAP_V4L2);
+	VideoCapture cap(0, cv::CAP_V4L2);
 
 	cap.set(CAP_PROP_FRAME_WIDTH, 800);
  	cap.set(CAP_PROP_FRAME_HEIGHT, 600);
@@ -18,6 +18,7 @@ int main(int, char**)
 		return -1; //end the program, possibly add error flag here later	
 	}
 
+	int fcount = 0;
 	int width = cap.get(3); //3 is width
 	int height = cap.get(4); //4 is height
 	int framerate = cap.get(5); //5 is framerate
@@ -29,14 +30,14 @@ int main(int, char**)
 	std::cout << "\n";
 */
 
-	VideoWriter video("akoutput.avi",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),24,Size(800, 600),true);	
+	VideoWriter video("akoutput.avi",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),cap.get(5),Size(800, 600),true);	
 
 	for(;;)
 	{
 		Mat frame;
 		cap >> frame;
 		video << frame; //YOU'RE TELLING ME YOU NEED TO WRITE IT TO THE OUTPUT TOO??? --> 
-		//The above line represents three days of my life that I will never get back, YAY!
+		//The above line represents three days of my life that I will never get back, YAY
 		if(frame.empty())
 		{
 			break;
@@ -46,7 +47,8 @@ int main(int, char**)
 		{
 			break;
 		}
-		
+	
+		fcount+=1;	
 	}
 	cap.release();
 	video.release();
