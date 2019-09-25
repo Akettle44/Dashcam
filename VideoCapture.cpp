@@ -32,7 +32,7 @@ int main(int, char**)
 
 	VideoWriter video("akoutput.avi",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),cap.get(5),Size(800, 600),true);	
 
-	for(;;)
+	for(fcount; fcount < 1560; fcount++)
 	{
 		Mat frame;
 		cap >> frame;
@@ -42,13 +42,6 @@ int main(int, char**)
 		{
 			break;
 		}
-		imshow("Hello there", frame);
-		if(waitKey(10) == 27)
-		{
-			break;
-		}
-	
-		fcount+=1;	
 	}
 	cap.release();
 	video.release();
