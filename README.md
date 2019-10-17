@@ -1,6 +1,6 @@
 # DIY Dashcam with Beaglebone Black and OpenCV
 
-This is a DIY personal dashcam using a Beaglebone and a Logitech C920. The code is brief and consists of OpenCV, V4L2, and FFMPEG currently running on Elementary OS 5.0 Juno and Ubuntu 18.04 LTS Bionic Beaver. I am using this as an introduction to embedded systems and wanted to expand this to eventually use a dnn for image processing.
+This is a DIY personal dashcam using a Beaglebone and a Logitech C920. The code is brief and consists of OpenCV, V4L2, and FFMPEG currently running on Elementary OS 5.0 Juno and Ubuntu 18.04 LTS Bionic Beaver. I am using this as an introduction to embedded systems.
 
 ## Getting Started
 
