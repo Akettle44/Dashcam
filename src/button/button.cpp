@@ -1,9 +1,9 @@
 /*
  * Written by Andrew Kettle
- * Could be cleaned up extensively by removing extra filestreams
+ * functional, but could be cleaned up extensively by removing extra filestreams
 */
 
-
+#include <iostream>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -52,26 +52,29 @@ int main()
 	while(1)
 	{
 		valuebut = fopen("/sys/class/gpio/gpio20/value", "r");
-		fread(butval, 1, sizeof(butval), valuebut);		
+		fread(butval, 1, sizeof(butval), valuebut);
 	
 		valueled = fopen("/sys/class/gpio/gpio49/value", "w");
 
-		if((strcmp(butval, "1") == 0) && (state == false)) //maybe change to string comp later?
+		if((strcmp(butval, "1") == 10) && (state == false)) 
 		{
 			//begin recording video
 			state = true;
 			fwrite("1", 1, sizeof("1"), valueled);			
 		}
 
-		else if((strcmp(butval, "0") == 0) && (state == true)) //maybe change to string comp later?
+		else if((strcmp(butval, "1") == 10) && (state == true)) 
 		{
 			//stop recording video
 			state = false;
 			fwrite("0", 1, sizeof("0"), valueled);			
 		}
+
 		fclose(valuebut);
-		fclose(valueled);	
+		fclose(valueled);
+
 	}
+
 
 	unexportled = fopen("/sys/class/gpio/unexport", "w");	
 	fwrite(gpio49, 1, sizeof(gpio49), unexportled); //writes 1 byte (size of char) to the file
