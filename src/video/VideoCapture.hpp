@@ -11,4 +11,7 @@
 
 using namespace cv;
 
+VideoCapture openVideo();
+void writeVideo(VideoCapture cap);
+
 #endif 
