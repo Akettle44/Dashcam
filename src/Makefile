@@ -1,4 +1,5 @@
-all: button video 
+all: 
+	g++ -I/usr/local/include/opencv4 -L/usr/local/lib/ -g -o test VideoCapture.cpp VideoCapture.hpp button.cpp button.hpp -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lopencv_videoio
 
 button:
 	g++ -g -Wall /button/button.cpp -o buttontest
