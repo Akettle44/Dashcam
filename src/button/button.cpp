@@ -4,6 +4,14 @@
 */
 #include "button.hpp"
 
+using namespace std;
+
+
+char gpio49[] = "49";
+char gpio20[] = "20";
+char out[] = "out";
+char in[] = "in";
+
 void init_GPIOs(FILE *button, FILE *led) //maybe change security later by making private and adding parameters
 {
 	//extract gpios

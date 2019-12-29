@@ -1,8 +1,17 @@
-all: 
-	g++ -I/usr/local/include/opencv4 -L/usr/local/lib/ -g -o test VideoCapture.cpp VideoCapture.hpp button.cpp button.hpp -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lopencv_videoio
+test:
+	g++ ~/dashcam/src/video/VideoCapture.o ~/dashcam/src/main/main.o ~/dashcam/src//button/button.o -o test
 
-button:
-	g++ -g -Wall /button/button.cpp -o buttontest
+subs: 
+	+$(MAKE) -C ~/dashcam/src/video
+	+$(MAKE) -C ~/dashcam/src/main
+	+$(MAKE) -C ~/dashcam/src/button
 
-video:	
-	g++ -I/usr/local/include/opencv4 -L/usr/local/lib/ -g -o test VideoCapture.cpp VideoCapture.hpp -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lopencv_videoio
+main:
+	$(MAKE) -C MAIN
+
+button: 
+	$(MAKE) -C BUTTON
+
+video:
+	$(MAKE) -C VIDEO
+

@@ -6,13 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-using namespace std;
-
-char gpio49[] = "49";
-char gpio20[] = "20";
-char out[] = "out";
-char in[] = "in";
-
 //initializes GPIOS
 void init_GPIOs(FILE *button, FILE *led); 
 //removes GPIOs
