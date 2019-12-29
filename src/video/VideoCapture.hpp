@@ -7,11 +7,12 @@
 #include <iostream>
 #include <string>
 
-#define DEBUG
-
 using namespace cv;
 
-VideoCapture openVideo();
-void writeVideo(VideoCapture cap);
+#define DEBUG
+
+VideoCapture initCapture();
+VideoWriter initWriter(VideoCapture cap);
+void closeVideo(VideoCapture cap, VideoWriter video);
 
 #endif 

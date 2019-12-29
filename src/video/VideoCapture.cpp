@@ -1,6 +1,6 @@
 #include "VideoCapture.hpp"
 
-Videocapture Video()
+VideoCapture initCapture()
 {
 	VideoCapture cap(0, cv::CAP_V4L2);
 	cap.set(CAP_PROP_FRAME_WIDTH, 800);
@@ -16,25 +16,23 @@ Videocapture Video()
 		return -1; //end the program, possibly add error flag here later	
 	}
 
-	int fcount = 0;
-	int width = cap.get(3); //3 is width
+/*	int width = cap.get(3); //3 is width
 	int height = cap.get(4); //4 is height
 	int framerate = cap.get(5); //5 is framerate
-
-	VideoWriter video("akoutput.avi",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),cap.get(5),Size(800, 600),true);
-
-	for(;;)
-	{
-		Mat frame;
-		cap >> frame; //reading into container
-		video << frame; //outputting to file 
-	}
-	cap.release();
-	video.release();
+*/	
+	return cap;
 }
 
-boolean breakout(boolean status)
+VideoWriter initWriter(VideoCapture cap)
 {
-	return status;
+	
+	VideoWriter video("akoutput.avi",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),cap.get(5),Size(800, 600),true);
 
+	return video;
+}
+
+void closeVideo(VideoCapture cap, VideoWriter video)
+{
+	cap.release();
+	video.release();
 }

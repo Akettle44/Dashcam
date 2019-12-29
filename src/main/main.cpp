@@ -4,36 +4,44 @@
 
 using namespace std;
 
-#include "button.hpp"
-#include "VideoCapture.hpp"
-#include <thread>
+#include "../button/button.hpp"
+#include "../video/VideoCapture.hpp"
  
 int main()
 {		
-	VideoCapture (*fnptr)(){ Video }; //check spelling, function pointer to open_Video
 	char butval[] = "0";
 	bool state =  false; //control flow begins in NOT recording state
 	FILE *button = NULL;
 	FILE *led = NULL;
+	Mat frame;
+	VideoCapture cap;
+	VideoWriter video;
 	init_GPIOs(button, led); //initializes gpio streams and then closes them, watch out for the closure
 	
 	while(1) //polling with a seperate thread for inputting and writing video
 	{
+		if(state == true)
+		{
+			cap >> frame;
+			video << frame;	
+		}
+		
 		button = fopen("/sys/class/gpio/gpio20/value", "r");
 		fread(butval, 1, sizeof(butval), button);
 		led = fopen("/sys/class/gpio/gpio49/value", "w");
 
 		if((strcmp(butval, "1") == 10) && (state == false)) 
 		{
-			//start new thread for recording and writing video
-			thread vid(fnptr); //starts new thread of video recording
+			//begin recording video
+			cap = initCapture();
+			video = initWriter(cap);
 			state = true;
 			fwrite("1", 1, sizeof("1"), led);			
 		}
 		else if((strcmp(butval, "1") == 10) && (state == true)) 
 		{
-			//interrupt thread 
-			//stop recording video
+			//close video
+			closeVideo(cap, video);
 			state = false;
 			fwrite("0", 1, sizeof("0"), led);
 			break; //breaks from infinite while			
@@ -41,7 +49,7 @@ int main()
 
 		if(button != NULL)
 		{
-			fclose(buton);
+			fclose(button);
 		}
 		if(led != NULL)
 		{
@@ -51,7 +59,7 @@ int main()
 
 	if(button != NULL)
 	{
-		fclose(buton);
+		fclose(button);
 	}
 	if(led != NULL)
 	{
