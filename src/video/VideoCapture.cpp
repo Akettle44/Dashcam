@@ -1,5 +1,7 @@
 #include "VideoCapture.hpp"
 
+using namespace cv;
+
 VideoCapture initCapture()
 {
 	VideoCapture cap(0, cv::CAP_V4L2);

@@ -1,9 +1,13 @@
 /*
- * Written by Andrew Kettle, last update December 14th
+ * Written by Andrew Kettle, last update February 17th
 */
 
 using namespace std;
 
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
 #include "../button/button.hpp"
 #include "../video/VideoCapture.hpp"
  
@@ -18,10 +22,14 @@ int main()
 	VideoWriter video;
 	init_GPIOs(button, led); //initializes gpio streams and then closes them, watch out for the closure
 	
-	while(1) //polling with a seperate thread for inputting and writing video
+
+	while(1) //polling
 	{
 		if(state == true)
 		{
+			cap.set(CAP_PROP_FPS, 24); //frame rate keeps hanging after a few seconds, forcing it to 24
+			cout.flush();
+			cout << "Adding frame \n";
 			cap >> frame;
 			video << frame;	
 		}
@@ -36,16 +44,19 @@ int main()
 			cap = initCapture();
 			video = initWriter(cap);
 			state = true;
-			fwrite("1", 1, sizeof("1"), led);			
+			fwrite("1", 1, sizeof("1"), led);
+			usleep(2000); //prevents the on sequence from hanging onto the off sequence			
 		}
 		else if((strcmp(butval, "1") == 10) && (state == true)) 
 		{
 			//close video
-			closeVideo(cap, video);
 			state = false;
+			closeVideo(cap, video);
 			fwrite("0", 1, sizeof("0"), led);
+			cout << "Got to break \n";
 			break; //breaks from infinite while			
 		}
+
 
 		if(button != NULL)
 		{
@@ -55,8 +66,10 @@ int main()
 		{
 			fclose(led);
 		}
+
 	}
 
+	cout << "Everything yeeted \n";
 	if(button != NULL)
 	{
 		fclose(button);
