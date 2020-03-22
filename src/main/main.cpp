@@ -13,6 +13,8 @@ using namespace std;
 #include "../button/button.hpp"
 #include "../video/VideoCapture.hpp"
  
+void *checkState(bool currstate, FILE *button, FILE *led);
+
 int main()
 {		
 	bool state =  false; //control flow begins in NOT recording state
@@ -29,7 +31,8 @@ int main()
 	
 	while(1) //polling
 	{
-		x = checkstate(state, button, led);
+		x = int(checkState(state, button, led));
+		cout << "This is x: " << "\n";
 		if(x != -1) //state needs to be changed
 		{
 			led = fopen("/sys/class/gpio/gpio49/value", "w");
@@ -45,6 +48,8 @@ int main()
 			else if(x == 2) 
 			{
 				//close video
+				pthread_join(check, NULL);
+				pthread_exit(NULL);
 				state = false;
 				closeVideo(cap, video);
 				fwrite("0", 1, sizeof("0"), led);
@@ -84,20 +89,20 @@ int main()
 	return 0;
 }
 
-int *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the camera needs to be turned off, 2 if it needs to be turned on, -1 otherwise
+void *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the camera needs to be turned off, 2 if it needs to be turned on, -1 otherwise
 {
 		char butval[] = "0";
 		button = fopen("/sys/class/gpio/gpio20/value", "r");
 		fread(butval, 1, sizeof(butval), button);
 		led = fopen("/sys/class/gpio/gpio49/value", "w");
 
-		if((strcmp(butval, "1") == 10) && (state == false)) 
+		if((strcmp(butval, "1") == 10) && (currstate == false)) 
 		{
-			return 1;
+			return (void *) 1;
 		}
-		else if((strcmp(butval, "1") == 10) && (state == true)) 
+		else if((strcmp(butval, "1") == 10) && (currstate == true)) 
 		{
-			return 2;
+			return (void *) 2;
 		}
 
 		if(button != NULL)
@@ -108,4 +113,6 @@ int *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the came
 		{
 			fclose(led);
 		}
+
+		return (void *) 0;
 }
