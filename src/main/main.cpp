@@ -5,30 +5,32 @@
 using namespace std;
 
 #include <unistd.h>
+#include <chrono>
+#include <future>
 #include <iostream>
 #include <semaphore.h>
-#include <pthread.h>
 #include <fstream>
 #include <stdio.h>
+#include <thread>
 #include "../button/button.hpp"
 #include "../video/VideoCapture.hpp"
  
-void* addFrame();
+void addFrame(VideoCapture cap, VideoWriter video, future<void> futureObj);
 
 int main()
 {		
 	bool state =  false; //control flow begins in NOT recording state
 	FILE *button = NULL;
 	FILE *led = NULL;
-	int x = -1;
-	int fcount = 0;
 	char butval[] = "0";
-	Mat frame;
 	VideoCapture cap;
 	VideoWriter video;
-	init_GPIOs(button, led); //initializes gpio streams and then closes them
+	promise<void> exitSig;
+	future<void> futureObj;
 
-	pthread_t frames; //declares thread
+	futureObj = exitSig.get_future();
+	init_GPIOs(button, led); //initializes gpio streams and then closes them
+	thread frames;
 	
 	while(1) //polling
 	{
@@ -41,7 +43,7 @@ int main()
 			//begin recording video
 			cap = initCapture();
 			video = initWriter(cap);
-			pthread_create(&frames, NULL, addFrame, void *(&cap), void *(&video)); //spawns thread
+			frames = thread(addFrame, cap, video, move(futureObj));
 			state = true;
 			fwrite("1", 1, sizeof("1"), led);
 			usleep(2000); //prevents the on sequence from hanging onto the off sequence			
@@ -49,8 +51,8 @@ int main()
 		else if((strcmp(butval, "1") == 10) && (state == true)) 
 		{ 
 			//close video
-			pthread_join(check, NULL);
-			pthread_exit(NULL);
+			exitSig.set_value(); //tells thread to exit	
+			frames.join(); //joins threads together
 			state = false;
 			closeVideo(cap, video);
 			fwrite("0", 1, sizeof("0"), led);
@@ -73,14 +75,15 @@ int main()
 	return 0;
 }
 
-void* addFrame(void *)
+void addFrame(VideoCapture cap, VideoWriter video, future<void> futureObj)
 {
-	cap.set(CAP_PROP_FPS, cap.get(5)); //frame rate keeps hanging after a few seconds, forcing it to 24
-	cout.flush();
-	cout << "Adding frame ";
-	cap >> frame;
-	video << frame;	
-	fcount++;	
-	cout << fcount << "\n";
+	while(futureObj.wait_for(chrono::milliseconds(1)) == future_status::timeout)
+	{
+		Mat frame;
+		cap.set(CAP_PROP_FPS, cap.get(5)); //frame rate keeps hanging after a few seconds, forcing it to 24
+		cout << "Adding frame " << "\n";
+		cap >> frame;
+		video << frame;	
+	}
 }
 

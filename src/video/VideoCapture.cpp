@@ -28,7 +28,7 @@ VideoCapture initCapture()
 VideoWriter initWriter(VideoCapture cap)
 {
 	
-	VideoWriter video("akoutput.avi",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),cap.get(5),Size(800, 600),true);
+	VideoWriter video("akoutput.mp4",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('H', '2', '6', '4'),cap.get(5),Size(800, 600),true);
 
 	return video;
 }
