@@ -13,7 +13,7 @@ using namespace std;
 #include "../button/button.hpp"
 #include "../video/VideoCapture.hpp"
  
-void *checkState(bool currstate, FILE *button, FILE *led);
+int checkState(bool currstate, FILE *button, FILE *led);
 
 int main()
 {		
@@ -26,12 +26,13 @@ int main()
 	VideoWriter video;
 	init_GPIOs(button, led); //initializes gpio streams and then closes them
 
-	pthread_t check;
+/*	pthread_t check;
 	pthread_create(&check, NULL, checkState, NULL);
+*/
 	
 	while(1) //polling
 	{
-		x = int(checkState(state, button, led));
+		x = checkState(state, button, led);
 		cout << "This is x: " << "\n";
 		if(x != -1) //state needs to be changed
 		{
@@ -48,8 +49,8 @@ int main()
 			else if(x == 2) 
 			{
 				//close video
-				pthread_join(check, NULL);
-				pthread_exit(NULL);
+//				pthread_join(check, NULL);
+//				pthread_exit(NULL);
 				state = false;
 				closeVideo(cap, video);
 				fwrite("0", 1, sizeof("0"), led);
@@ -58,7 +59,7 @@ int main()
 			}
 			else
 			{
-				cout << "An error occured";
+				cout << "An error occured" << "\n";
 			}
 			
 		}	
@@ -66,7 +67,7 @@ int main()
 		{
 			if(state == true)
 			{
-				cap.set(CAP_PROP_FPS, 24); //frame rate keeps hanging after a few seconds, forcing it to 24
+				cap.set(CAP_PROP_FPS, cap.get(5)); //frame rate keeps hanging after a few seconds, forcing it to 24
 				cout.flush();
 				cout << "Adding frame \n";
 				cap >> frame;
@@ -89,8 +90,9 @@ int main()
 	return 0;
 }
 
-void *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the camera needs to be turned off, 2 if it needs to be turned on, -1 otherwise
+int checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the camera needs to be turned off, 2 if it needs to be turned on, -1 otherwise
 {
+		int rval = 0;
 		char butval[] = "0";
 		button = fopen("/sys/class/gpio/gpio20/value", "r");
 		fread(butval, 1, sizeof(butval), button);
@@ -98,11 +100,11 @@ void *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the cam
 
 		if((strcmp(butval, "1") == 10) && (currstate == false)) 
 		{
-			return (void *) 1;
+			rval = 1;
 		}
 		else if((strcmp(butval, "1") == 10) && (currstate == true)) 
 		{
-			return (void *) 2;
+			rval = 2;
 		}
 
 		if(button != NULL)
@@ -114,5 +116,5 @@ void *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the cam
 			fclose(led);
 		}
 
-		return (void *) 0;
+		return rval;
 }

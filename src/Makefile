@@ -6,11 +6,11 @@ subs:
 	+$(MAKE) -C ~/dashcam/src/button
 
 main:
-	$(MAKE) -C ~dashcam/src/main
-
+	+$(MAKE) -C ~dashcam/src/main
+	
 button: 
-	$(MAKE) -C BUTTON
+	+$(MAKE) -C BUTTON
 
 video:
-	$(MAKE) -C VIDEO
+	+$(MAKE) -C VIDEO
 
