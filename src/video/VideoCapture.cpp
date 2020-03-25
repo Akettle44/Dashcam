@@ -7,7 +7,7 @@ VideoCapture initCapture()
 	VideoCapture cap(0, cv::CAP_V4L2);
 	cap.set(CAP_PROP_FRAME_WIDTH, 800);
  	cap.set(CAP_PROP_FRAME_HEIGHT, 600);
- 	cap.set(CAP_PROP_FPS, 24);
+ 	cap.set(CAP_PROP_FPS, 15);
 	cap.set(CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
 
 	if(!cap.isOpened())

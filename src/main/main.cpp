@@ -5,74 +5,68 @@
 using namespace std;
 
 #include <unistd.h>
+#include <chrono>
+#include <atomic>
+#include <future>
 #include <iostream>
 #include <semaphore.h>
-#include <pthread.h>
 #include <fstream>
 #include <stdio.h>
+#include <thread>
 #include "../button/button.hpp"
 #include "../video/VideoCapture.hpp"
  
-void *checkState(bool currstate, FILE *button, FILE *led);
+void addFrame();
+
+//global atomic bool
+//atomic<bool> exitSignal(false);
 
 int main()
 {		
-	bool state =  false; //control flow begins in NOT recording state
+	char butval[] = "0";
+	bool state = false; //control flow begins in NOT recording state
 	FILE *button = NULL;
 	FILE *led = NULL;
-	int x = -1;
-	Mat frame;
-	VideoCapture cap;
-	VideoWriter video;
+
+	thread frames;
+
 	init_GPIOs(button, led); //initializes gpio streams and then closes them
 
-	pthread_t check;
-	pthread_create(&check, NULL, checkState, NULL);
-	
 	while(1) //polling
 	{
-		x = int(checkState(state, button, led));
-		cout << "This is x: " << "\n";
-		if(x != -1) //state needs to be changed
+		button = fopen("/sys/class/gpio/gpio20/value", "r");
+		fread(butval, 1, sizeof(butval), button);
+
+		if((strcmp(butval, "1") == 10) && (state == false)) 
 		{
-			led = fopen("/sys/class/gpio/gpio49/value", "w");
-			if(x == 1) 
-			{
-				//begin recording video
-				cap = initCapture();
-				video = initWriter(cap);
-				state = true;
-				fwrite("1", 1, sizeof("1"), led);
-				usleep(2000); //prevents the on sequence from hanging onto the off sequence			
-			}
-			else if(x == 2) 
-			{
-				//close video
-				pthread_join(check, NULL);
-				pthread_exit(NULL);
-				state = false;
-				closeVideo(cap, video);
-				fwrite("0", 1, sizeof("0"), led);
-				cout << "Got to break \n";
-				break; //breaks from infinite while
-			}
-			else
-			{
-				cout << "An error occured";
-			}
-			
-		}	
-		else
+			led = fopen("/sys/class/gpio/gpio49/value", "w"); 
+			//begin recording video
+			state = true;
+			fwrite("1", 1, sizeof("1"), led);
+			frames = thread(addFrame);
+			frames.detach();
+			usleep(200000); //prevents the on sequence from hanging onto the off sequence			
+		}
+		else if((strcmp(butval, "1") == 10) && (state == true)) 
+		{ 
+			led = fopen("/sys/class/gpio/gpio49/value", "w"); 
+			//close video
+		//	exitSignal = true;
+			state = false;
+			fwrite("0", 1, sizeof("0"), led);
+			cout << "Got to break \n";
+			break; //breaks from infinite while
+		}
+
+		if(button != NULL)
 		{
-			if(state == true)
-			{
-				cap.set(CAP_PROP_FPS, 24); //frame rate keeps hanging after a few seconds, forcing it to 24
-				cout.flush();
-				cout << "Adding frame \n";
-				cap >> frame;
-				video << frame;	
-			}
-		 }
+			fclose(button);
+		}
+		if(led != NULL)
+		{
+			fclose(led);
+		}
+		
 	}
 
 	cout << "Everything yeeted \n";
@@ -89,30 +83,22 @@ int main()
 	return 0;
 }
 
-void *checkState(bool currstate, FILE *button, FILE *led) //returns 1 if the camera needs to be turned off, 2 if it needs to be turned on, -1 otherwise
+void addFrame()
 {
-		char butval[] = "0";
-		button = fopen("/sys/class/gpio/gpio20/value", "r");
-		fread(butval, 1, sizeof(butval), button);
-		led = fopen("/sys/class/gpio/gpio49/value", "w");
+	VideoCapture cap;
+	VideoWriter video;
+	Mat frame;
 
-		if((strcmp(butval, "1") == 10) && (currstate == false)) 
-		{
-			return (void *) 1;
-		}
-		else if((strcmp(butval, "1") == 10) && (currstate == true)) 
-		{
-			return (void *) 2;
-		}
+	cap = initCapture();
+	video = initWriter(cap);
 
-		if(button != NULL)
-		{
-			fclose(button);
-		}
-		if(led != NULL)
-		{
-			fclose(led);
-		}
+	while(1)
+	{
+	//	cap.set(CAP_PROP_FPS, cap.get(5)); //frame rate keeps hanging after a few seconds, forcing it to 24
+		cout << "Adding frame " << "\n";
+		cap >> frame;
+		video << frame;	
+	}
 
-		return (void *) 0;
+	closeVideo(cap, video);
 }
