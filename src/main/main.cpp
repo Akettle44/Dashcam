@@ -32,6 +32,11 @@ int main()
 
 	init_GPIOs(button, led); //initializes gpio streams and then closes them
 
+	led = fopen("/sys/class/gpio/gpio49/value", "w"); 
+	fwrite("1", 1, sizeof("1"), led);
+	frames = thread(addFrame);
+	frames.join();
+/*
 	while(1) //polling
 	{
 		button = fopen("/sys/class/gpio/gpio20/value", "r");
@@ -68,6 +73,8 @@ int main()
 		}
 		
 	}
+
+*/
 
 	cout << "Everything yeeted \n";
 	if(button != NULL)
