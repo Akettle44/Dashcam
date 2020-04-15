@@ -4,10 +4,10 @@ using namespace cv;
 
 VideoCapture initCapture()
 {
-	VideoCapture cap(0, cv::CAP_V4L2);
+	VideoCapture cap(1, cv::CAP_V4L2);
 	cap.set(CAP_PROP_FRAME_WIDTH, 800);
  	cap.set(CAP_PROP_FRAME_HEIGHT, 600);
- 	cap.set(CAP_PROP_FPS, 15);
+ 	cap.set(CAP_PROP_FPS, 30);
 	cap.set(CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
 
 	if(!cap.isOpened())
@@ -19,7 +19,7 @@ VideoCapture initCapture()
 	}
 
 /*	int width = cap.get(3); //3 is width
-	int height = cap.get(4); //4 is height
+	int height = cap.get(4)s //4 is height
 	int framerate = cap.get(5); //5 is framerate
 */	
 	return cap;
