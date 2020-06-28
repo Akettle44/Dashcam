@@ -1,15 +1,12 @@
 /*
- * Written by Andrew Kettle, last update February 17th
+ * Written by Andrew Kettle, last update June 27th
 */
-
 using namespace std;
 
 #include <unistd.h>
 #include <chrono>
 #include <atomic>
-#include <future>
 #include <iostream>
-#include <semaphore.h>
 #include <fstream>
 #include <stdio.h>
 #include <thread>
@@ -17,9 +14,7 @@ using namespace std;
 #include "../video/VideoCapture.hpp"
  
 void addFrame();
-
-//global atomic bool
-//atomic<bool> exitSignal(false);
+bool addingFrames = false;
 
 int main()
 {		
@@ -29,14 +24,8 @@ int main()
 	FILE *led = NULL;
 
 	thread frames;
-
 	init_GPIOs(button, led); //initializes gpio streams and then closes them
 
-	led = fopen("/sys/class/gpio/gpio49/value", "w"); 
-	fwrite("1", 1, sizeof("1"), led);
-	frames = thread(addFrame);
-	frames.join();
-/*
 	while(1) //polling
 	{
 		button = fopen("/sys/class/gpio/gpio20/value", "r");
@@ -46,35 +35,30 @@ int main()
 		{
 			led = fopen("/sys/class/gpio/gpio49/value", "w"); 
 			//begin recording video
+			addingFrames = true;
 			state = true;
 			fwrite("1", 1, sizeof("1"), led);
+			fclose(led);
 			frames = thread(addFrame);
-			frames.detach();
 			usleep(200000); //prevents the on sequence from hanging onto the off sequence			
 		}
 		else if((strcmp(butval, "1") == 10) && (state == true)) 
 		{ 
 			led = fopen("/sys/class/gpio/gpio49/value", "w"); 
 			//close video
-		//	exitSignal = true;
+			addingFrames = false;
 			state = false;
+			frames.join();
 			fwrite("0", 1, sizeof("0"), led);
+			fclose(led);
 			cout << "Got to break \n";
 			break; //breaks from infinite while
 		}
-
-		if(button != NULL)
+		if(button != NULL) //Close the button file pointer if it needs to be closed
 		{
 			fclose(button);
 		}
-		if(led != NULL)
-		{
-			fclose(led);
-		}
-		
 	}
-
-*/
 
 	cout << "Everything yeeted \n";
 	if(button != NULL)
@@ -95,17 +79,14 @@ void addFrame()
 	VideoCapture cap;
 	VideoWriter video;
 	Mat frame;
-
 	cap = initCapture();
 	video = initWriter(cap);
 
-	while(1)
+	while(addingFrames)
 	{
-	//	cap.set(CAP_PROP_FPS, cap.get(5)); //frame rate keeps hanging after a few seconds, forcing it to 24
 		cout << "Adding frame " << "\n";
 		cap >> frame;
 		video << frame;	
 	}
-
 	closeVideo(cap, video);
 }
