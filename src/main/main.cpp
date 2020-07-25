@@ -14,7 +14,7 @@ using namespace std;
 #include "../video/VideoCapture.hpp"
  
 void addFrame();
-bool addingFrames = false;
+bool addingFrames = false; //only one write so don't need to share memory
 
 int main()
 {		
@@ -24,6 +24,7 @@ int main()
 	FILE *led = NULL;
 
 	thread frames;
+
 	init_GPIOs(button, led); //initializes gpio streams and then closes them
 
 	while(1) //polling
@@ -58,6 +59,8 @@ int main()
 		{
 			fclose(button);
 		}
+		sleep(5); //sleeps for 5 seconds, big bandaid until I track down other errors
+		//when polling, sleep leaves the program vulnerable to not picking up the button press
 	}
 
 	cout << "Everything yeeted \n";
@@ -81,12 +84,14 @@ void addFrame()
 	Mat frame;
 	cap = initCapture();
 	video = initWriter(cap);
+	int fcount = 1;
 
 	while(addingFrames)
 	{
-		cout << "Adding frame " << "\n";
+		cout << "Adding frame " << fcount << "\n";
 		cap >> frame;
 		video << frame;	
+		fcount++;
 	}
 	closeVideo(cap, video);
 }
